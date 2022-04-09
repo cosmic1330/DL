@@ -1,13 +1,13 @@
 # mac 使用
-import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# import os
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
 
 import numpy as np
 import pandas as pd
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout
-from keras.utils import to_categorical
-from keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Activation, Dropout
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.datasets import mnist
 import matplotlib.pyplot as plt
 
 # 分為訓練資料和測試資料(圖片,答案)
