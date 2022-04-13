@@ -1,13 +1,19 @@
 # mac 使用
-# import os
-# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+import os
+os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+from keras.models import Sequential
+from keras.layers import Dense, Activation, Dropout
+from keras.utils import to_categorical
+from keras.datasets import mnist
+
+# windows 使用
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense, Activation, Dropout
+# from tensorflow.keras.utils import to_categorical
+# from tensorflow.keras.datasets import mnist
 
 import numpy as np
 import pandas as pd
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Activation, Dropout
-from tensorflow.keras.utils import to_categorical
-from tensorflow.keras.datasets import mnist
 import matplotlib.pyplot as plt
 
 # 分為訓練資料和測試資料(圖片,答案)
@@ -35,7 +41,7 @@ x_test = np.reshape(x_test, [-1, input_size]).astype('float32')
 x_test = x_test / 255
 
 epochs = 20
-batch_size = 128
+batch_size = 129
 
 model = Sequential()
 # 第一層
@@ -53,7 +59,8 @@ model.add(Dense(num_labels))
 model.add(Activation('softmax'))
 model.summary()
 
-model.compile(loss='categorical_crossentropy',
+model.compile(
+              loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
@@ -66,8 +73,8 @@ loss, accuracy = model.evaluate(x_test,
 print("\nTest accuracy: %.1f%%" % (100.0 * accuracy))
 
 # 儲存model和結果
-model.save("./DL/mnist.h5",myModel.history)
-np.save('./DL/mnist_history.npy',myModel.history)
+model.save("./DL/mnist/mnist.h5",myModel.history)
+np.save('./DL/mnist/mnist_history.npy',myModel.history)
 
 
 # 預測
