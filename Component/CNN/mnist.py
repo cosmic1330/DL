@@ -1,7 +1,7 @@
 
 # mac 使用
-import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# import os
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,8 +31,7 @@ class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
 train_images = train_images / 255.0
 test_images = test_images / 255.0
 
-print(train_images.shape)
-
+# 新增到三維空間
 X_train = np.expand_dims(train_images,axis=3)
 X_test = np.expand_dims(test_images,axis=3)
 
