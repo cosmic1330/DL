@@ -1,16 +1,16 @@
 # mac 使用
-import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-from keras.models import Sequential
-from keras.layers import Dense, Activation, Dropout
-from keras.utils import to_categorical
-from keras.datasets import mnist
+# import os
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# from keras.models import Sequential
+# from keras.layers import Dense, Activation, Dropout
+# from keras.utils import to_categorical
+# from keras.datasets import mnist
 
 # windows 使用
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Dense, Activation, Dropout
-# from tensorflow.keras.utils import to_categorical
-# from tensorflow.keras.datasets import mnist
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Activation, Dropout
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.datasets import mnist
 
 import numpy as np
 import pandas as pd

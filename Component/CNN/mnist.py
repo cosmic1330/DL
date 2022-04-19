@@ -2,6 +2,28 @@
 # mac 使用
 # import os
 # os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# from keras.models import Sequential
+# from keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
+# from keras.optimizers import Adam
+# from keras.preprocessing import image
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras.callbacks import ModelCheckpoint
+# from keras.callbacks import EarlyStopping
+# from keras.utils.np_utils import to_categorical 
+
+
+# windows使用
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.utils import to_categorical 
+# 使用cpu
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"]='-1' 
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -38,29 +60,18 @@ X_test = np.expand_dims(test_images,axis=3)
 print("X_train shape: ",X_train.shape)
 print("X_test shape: ",X_test.shape)
 
-from keras.utils.np_utils import to_categorical 
+
 
 # convert to one-hot-encoding(one hot vectors)
 Y_train = to_categorical(train_labels)
-# convert to one-hot-encoding(one hot vectors)
 Y_test = to_categorical(test_labels)
 
-print(Y_train.shape)
-print(Y_test.shape)
+print("Y_train shape: ",Y_train.shape)
+print("Y_test shape: ",Y_test.shape)
 
 
 from sklearn.model_selection import train_test_split
 x_train, x_val, y_train, y_val = train_test_split(X_train, Y_train, test_size = 0.1, random_state = 2)
-
-
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
-from keras.optimizers import Adam
-from keras.preprocessing import image
-from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ModelCheckpoint
-from keras.callbacks import EarlyStopping
-
 
 model = Sequential()
 
@@ -70,18 +81,21 @@ model.add(BatchNormalization())
 model.add(Activation("relu"))
 
 #2. LAYER
-model.add(Conv2D(filters = 32, kernel_size = (3,3), padding = 'Same'))
+model.add(Conv2D(filters = 48, kernel_size = (1,1), padding = 'Same'))
+model.add(Conv2D(filters = 48, kernel_size = (3,3), padding = 'Same'))
 model.add(BatchNormalization())
 model.add(Activation("relu"))
-
 model.add(MaxPool2D(pool_size=(2, 2)))
 
 #3. LAYER
+
+model.add(Conv2D(filters = 64, kernel_size = (1,1), padding = 'Same'))
 model.add(Conv2D(filters = 64, kernel_size = (3,3), padding = 'Same'))
 model.add(BatchNormalization())
 model.add(Activation("relu"))
 
 #4. LAYER
+model.add(Conv2D(filters = 64, kernel_size = (1,1), padding = 'Same'))
 model.add(Conv2D(filters = 64, kernel_size = (3,3), padding = 'Same'))
 model.add(BatchNormalization())
 model.add(Activation("relu"))
@@ -134,7 +148,7 @@ my_callbacks = [
 # model.fit(x_train_norm, y_train, epochs=5, validation_split=0.2, callbacks=model_checkpoint_callback)
 
 # 降低資料佔據
-history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),shuffle=True,epochs=epochs, 
+history = model.fit(datagen.flow(x_train, y_train, batch_size=batch_size),shuffle=True,epochs=epochs, 
                               validation_data = (x_val, y_val),
                               verbose = 2, #verbose=2過程全顯示
                               steps_per_epoch=x_train.shape[0] // batch_size,
