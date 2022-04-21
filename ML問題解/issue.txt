@@ -15,3 +15,14 @@
 
 4.  OP_REQUIRES failed at conv_ops_fused_impl.h:778 : Resource exhausted: OOM when allocating tensor with shape[50,32,300,300] and type float on /job:localhost/replica:0/task:0/device:GPU:0 by allocator GPU_0_bfc
    A:降低圖片質量 batch_size改成1 改用大記憶體的顯示卡 增加顯示卡, 並行訓練
+
+5. 出現loss nan
+   A:https://zhuanlan.zhihu.com/p/114150904#:~:text=%E5%8E%9F%E5%9B%A0%EF%BC%9A%E5%AD%A6%E4%B9%A0%E7%9A%84%E8%BF%87%E7%A8%8B%E4%B8%AD,%E6%89%80%E4%BB%A5%E5%8F%98%E6%88%90%E4%BA%86Nan%E3%80%82
+     https://www.zhihu.com/question/49346370
+     https://blog.csdn.net/Drifter_Galaxy/article/details/104004267
+
+6. 解決overfitting
+   A:https://cinnamonaitaiwan.medium.com/cnn%E5%85%A5%E9%96%80-overfitting-d10acd15ec21
+
+7. 模型調整
+   A:https://blog.ailemon.net/2019/02/26/solution-to-loss-doesnt-drop-in-nn-train/

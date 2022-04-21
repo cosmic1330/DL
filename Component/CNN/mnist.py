@@ -1,26 +1,26 @@
 
 # mac 使用
-# import os
-# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-# from keras.models import Sequential
-# from keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
-# from keras.optimizers import Adam
-# from keras.preprocessing import image
-# from keras.preprocessing.image import ImageDataGenerator
-# from keras.callbacks import ModelCheckpoint
-# from keras.callbacks import EarlyStopping
-# from keras.utils.np_utils import to_categorical 
+import os
+os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
+from keras.optimizers import Adam
+from keras.preprocessing import image
+from keras.preprocessing.image import ImageDataGenerator
+from keras.callbacks import ModelCheckpoint
+from keras.callbacks import EarlyStopping
+from keras.utils.np_utils import to_categorical 
 
 
 # windows使用
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing import image
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.callbacks import EarlyStopping
-from tensorflow.keras.utils import to_categorical 
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
+# from tensorflow.keras.optimizers import Adam
+# from tensorflow.keras.preprocessing import image
+# from tensorflow.keras.preprocessing.image import ImageDataGenerator
+# from tensorflow.keras.callbacks import ModelCheckpoint
+# from tensorflow.keras.callbacks import EarlyStopping
+# from tensorflow.keras.utils import to_categorical 
 # 使用cpu
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"]='-1' 
@@ -148,7 +148,7 @@ my_callbacks = [
 # model.fit(x_train_norm, y_train, epochs=5, validation_split=0.2, callbacks=model_checkpoint_callback)
 
 # 降低資料佔據
-history = model.fit(datagen.flow(x_train, y_train, batch_size=batch_size),shuffle=True,epochs=epochs, 
+history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),shuffle=True,epochs=epochs, 
                               validation_data = (x_val, y_val),
                               verbose = 2, #verbose=2過程全顯示
                               steps_per_epoch=x_train.shape[0] // batch_size,
@@ -167,7 +167,7 @@ plt.legend(loc='upper right')
 
 plt.subplot(1, 2, 2)
 plt.ylabel('Accuracy', fontsize=16)
-plt.plot(history.history['accuracy'], color='green', label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], color='orange', label='Validation Accuracy')
+plt.plot(history.history['acc'], color='green', label='Training Accuracy')
+plt.plot(history.history['val_acc'], color='orange', label='Validation Accuracy')
 plt.legend(loc='lower right')
 plt.show()

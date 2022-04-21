@@ -1,23 +1,31 @@
 
 
 # mac 使用
-# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-# from keras.preprocessing.image import ImageDataGenerator
-# from keras import layers,models
-# from keras.utils import to_categorical
+import imp
+import os
+os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+from keras.preprocessing.image import ImageDataGenerator
+from keras.models import Sequential
+from keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
+from keras.utils import to_categorical
+from keras import regularizers
+from keras.callbacks import ModelCheckpoint, EarlyStopping
+from keras.optimizers import RMSprop, Adadelta, Adam, SGD
+from keras.losses import categorical_crossentropy, binary_crossentropy
 
 # windows
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
-from tensorflow.keras.utils import to_categorical
-import tensorflow as tf
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth=True
-sess = tf.compat.v1.Session(config=config)
+# import os
+# from tensorflow.keras.preprocessing.image import ImageDataGenerator
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
+# from tensorflow.keras.utils import to_categorical
+# from tensorflow.keras import regularizers
+# import tensorflow as tf
+# config = tf.compat.v1.ConfigProto()
+# config.gpu_options.allow_growth=True
+# sess = tf.compat.v1.Session(config=config)
 
 # common
-import os
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
@@ -103,41 +111,78 @@ print('validation label size: ',val_label.shape)
 
 # define model
 cnn=Sequential() 
-cnn.add(Conv2D(filters=32,kernel_size=(3,3), input_shape=(300,300,3),activation='relu',padding='same'))
-cnn.add(Conv2D(filters=32,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=64,kernel_size=(3,3), input_shape=(300,300,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(BatchNormalization())
 cnn.add(MaxPooling2D(pool_size=(2,2),padding='same'))
 
 cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
 cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(BatchNormalization())
+cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2,2),padding='same'))
 
-cnn.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(BatchNormalization())
+cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
-cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(BatchNormalization())
+cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
-cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
 cnn.add(BatchNormalization())
 cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
 cnn.add(Flatten())
-cnn.add(Dense(units=64,activation='relu'))
-cnn.add(Dense(units=32,activation='relu'))
+cnn.add(Dense(units=32,kernel_regularizer=regularizers.l2(l=0.001),activation='relu'))
+cnn.add(Dense(units=16,kernel_regularizer=regularizers.l2(l=0.001),activation='relu'))
 cnn.add(Dense(units=4,activation='softmax'))
 # show the model structure
 cnn.summary()
 
+from keras.preprocessing.image import ImageDataGenerator ##Augmentation
+
+datagen = ImageDataGenerator(
+        featurewise_center=False,  # 以每一張feature map為單位將平均值設為0
+        samplewise_center=False,  # set each sample mean to 0
+        featurewise_std_normalization=False,  # 以每一張feature map為單位將數值除以其標準差(上述兩步驟就是我們常見的Standardization)
+        samplewise_std_normalization=False,  #  將输入的每個樣本除以其自身的標準差。
+        zca_whitening=False,  # dimesion reduction
+        rotation_range=0.1,  # 隨機旋轉圖片
+        zoom_range = 0.1, #  隨機縮放範圍
+        width_shift_range=0.1,  #  水平平移，相對總寬度的比例
+        height_shift_range=0.1,  # 垂直平移，相對總高度的比例
+        horizontal_flip=False,  # 一半影象水平翻轉
+        vertical_flip=False)  # 一半影象垂直翻轉
+datagen.fit(train_data)
+
+my_callbacks = [
+    # validation loss 三個執行週期沒改善就停止訓練
+    EarlyStopping(patience=3, monitor = 'val_accuracy'),
+    # save the best weights
+    ModelCheckpoint(filepath="Component/CNN/vgg16_model_weight.h5", verbose=1, save_best_only=True)
+]
+
+
 # comiple model
-cnn.compile(optimizer='adam',loss="categorical_crossentropy",metrics=['accuracy'])
-history = cnn.fit(train_data, train_label,batch_size=50 ,epochs=3, validation_split=0.3)
+# optimizer = Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False )
+# optimizer = RMSprop(lr = 0.001, rho=0.9, epsilon=1e-08, decay=0.0)
+# optimizer = Adadelta(lr=1.0, rho=0.95, epsilon=None, decay=0.0)
+# optimizer = SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
+
+cnn.compile(optimizer="adam",loss=binary_crossentropy,metrics=['accuracy'])
+history = cnn.fit_generator(datagen.flow(train_data, train_label, batch_size=32) , epochs=20, validation_data = (val_data, val_label),callbacks = my_callbacks)
+# history = cnn.fit(train_data, train_label, batch_size=32, epochs=20, validation_data = (val_data, val_label), callbacks=my_callbacks)
 print("++ finish training ++")
 
 # 繪圖
@@ -147,8 +192,8 @@ plt.title('loss curve')
 plt.ylabel('loss')
 plt.legend()
 plt.show()
-plt.plot(history.history['accuracy'],label='accuracy')
-plt.plot(history.history['val_accuracy'],label='val_accuracy')
+plt.plot(history.history['acc'],label='accuracy')
+plt.plot(history.history['val_acc'],label='val_accuracy')
 plt.title('accuracy curve')
 plt.ylabel('accuracy')
 plt.legend()
@@ -173,7 +218,7 @@ prediction=cnn.predict(testData)
 prediction=np.argmax(prediction,axis=1)
 prediction
 test_label=pd.DataFrame()
-test_label['image_id']=te_filename
+test_label['image_id']=testFileNames
 test_label['labels']=prediction
 test_label=test_label.sort_values(by='image_id')
 test_label.to_csv('/content/drive/MyDrive/weather_image/predict_label.csv',index=False)
