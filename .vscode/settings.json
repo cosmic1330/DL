@@ -1,13 +1,16 @@
 {
   "editor.formatOnSave": true,
   "python.formatting.autopep8Args": [
-    "--max-line-length",
-    "120",
+    "--max-line-length=80",
     "--experimental"
   ],
   "python.formatting.yapfArgs": [
     "--style",
     "{based_on_style: chromium, indent_width: 20}"
   ],
-  "python.formatting.blackArgs": ["--line-length", "100"]
+  "python.formatting.blackArgs": [
+    "--line-length",
+    "100"
+  ],
+  "python.formatting.provider": "autopep8",
 }
