@@ -1,0 +1,17 @@
+1. 建議版本配置
+   cuda:11.5.1
+   cnDNN:8.2.2.26
+   tensorflow 2.25.0
+
+2. cudart64_110.dll error
+   A:下載cudart64_110.dll，將cudart64_110.dll放到C:/Windows/System32
+
+3. Allocator (GPU_0_bfc) ran out of memory trying to allocate 1.10GiB with freed_by_count=0. The caller indicates that this is not a failure, but may mean that there could be performance gains if more memory were available.
+   A:加入
+   import tensorflow as tf
+   config = tf.compat.v1.ConfigProto()
+   config.gpu_options.allow_growth=True
+   sess = tf.compat.v1.Session(config=config)
+
+4.  OP_REQUIRES failed at conv_ops_fused_impl.h:778 : Resource exhausted: OOM when allocating tensor with shape[50,32,300,300] and type float on /job:localhost/replica:0/task:0/device:GPU:0 by allocator GPU_0_bfc
+   A:降低圖片質量 batch_size改成1 改用大記憶體的顯示卡 增加顯示卡, 並行訓練

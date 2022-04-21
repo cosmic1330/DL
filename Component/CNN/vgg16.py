@@ -1,12 +1,25 @@
 
 
 # mac 使用
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras import layers,models
+# from keras.utils import to_categorical
+
+# windows
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
+from tensorflow.keras.utils import to_categorical
+import tensorflow as tf
+config = tf.compat.v1.ConfigProto()
+config.gpu_options.allow_growth=True
+sess = tf.compat.v1.Session(config=config)
+
+# common
 import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-from keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import cv2
-from keras import layers,models
 import matplotlib.pyplot as plt
 
 # 讀取資料－１
@@ -52,6 +65,7 @@ def convertImageToNumpy(list):
     data=np.empty(shape=(1048,300,300,3))
     x=0
     label=[]
+    fileNames=[]
     for index, url in enumerate(list):
         for i in range(len(os.listdir(url))):
             fileName=os.listdir(url)[i]
@@ -60,14 +74,15 @@ def convertImageToNumpy(list):
             img=img[:,:,::-1]/255
             data[x]=img
             label.append(index)
+            fileNames.append(fileName)
             x+=1
     label=np.array(label)
-    return data, label
+    return data, label, fileNames
 
-trainData,trainLabel = convertImageToNumpy(list=[trcloudy,trrain,trshine,trsunrise]) # label=[0,1,2,3,4]
+trainData,trainLabel, trainFileNames = convertImageToNumpy(list=[trcloudy,trrain,trshine,trsunrise]) # label=[0,1,2,3,4]
+testData, testLabel, testFileNames = convertImageToNumpy(list=[testpath])
 
 # on-hot label
-from keras.utils import to_categorical
 trainLabel=to_categorical(trainLabel)
 # 打亂資料順序
 from sklearn.utils import shuffle
@@ -87,40 +102,57 @@ print('train label size: ',train_label.shape)
 print('validation label size: ',val_label.shape)
 
 # define model
-cnn=models.Sequential() # name the network
-# feature extraction
-cnn.add(layers.Conv2D(filters=32,kernel_size=(3,3), input_shape=(300,300,3),activation='relu',padding='same'))
-cnn.add(layers.Conv2D(filters=32,kernel_size=(3,3),activation='relu',padding='same'))
-cnn.add(layers.MaxPooling2D(pool_size=(2,2),padding='same'))
-cnn.add(layers.Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
-cnn.add(layers.Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
-cnn.add(layers.MaxPooling2D(pool_size=(2,2),padding='same'))
-cnn.add(layers.Flatten())
-# neron network
-cnn.add(layers.Dense(units=64,activation='relu'))
-cnn.add(layers.BatchNormalization())
-cnn.add(layers.Dense(units=32,activation='relu'))
-cnn.add(layers.Dense(units=4,activation='softmax'))
+cnn=Sequential() 
+cnn.add(Conv2D(filters=32,kernel_size=(3,3), input_shape=(300,300,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=32,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(MaxPooling2D(pool_size=(2,2),padding='same'))
+
+cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(MaxPooling2D(pool_size=(2,2),padding='same'))
+
+cnn.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(128, (3, 3), activation='relu', padding='same'))
+cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(BatchNormalization())
+cnn.add(Dropout(0.25))
+cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
+
+cnn.add(Flatten())
+cnn.add(Dense(units=64,activation='relu'))
+cnn.add(Dense(units=32,activation='relu'))
+cnn.add(Dense(units=4,activation='softmax'))
 # show the model structure
 cnn.summary()
 
 # comiple model
 cnn.compile(optimizer='adam',loss="categorical_crossentropy",metrics=['accuracy'])
-history = cnn.fit(train_data, train_label,batch_size=50 ,epochs=5, validation_split=0.3)
+history = cnn.fit(train_data, train_label,batch_size=50 ,epochs=3, validation_split=0.3)
+print("++ finish training ++")
 
 # 繪圖
-# plt.plot(history.history['loss'],label='loss')
-# plt.plot(history.history['val_loss'],label='val_loss')
-# plt.title('loss curve')
-# plt.ylabel('loss')
-# plt.legend()
-# plt.show()
-# plt.plot(history.history['accuracy'],label='accuracy')
-# plt.plot(history.history['val_accuracy'],label='val_accuracy')
-# plt.title('accuracy curve')
-# plt.ylabel('accuracy')
-# plt.legend()
-# plt.show()
+plt.plot(history.history['loss'],label='loss')
+plt.plot(history.history['val_loss'],label='val_loss')
+plt.title('loss curve')
+plt.ylabel('loss')
+plt.legend()
+plt.show()
+plt.plot(history.history['accuracy'],label='accuracy')
+plt.plot(history.history['val_accuracy'],label='val_accuracy')
+plt.title('accuracy curve')
+plt.ylabel('accuracy')
+plt.legend()
+plt.show()
 
 # 混淆舉證
 import seaborn as sn
@@ -136,12 +168,12 @@ plt.ylabel('true label')
 plt.show()
 
 # 結果轉csv檔
-# import pandas as pd
-# prediction=cnn.predict(te_data)
-# prediction=np.argmax(prediction,axis=1)
-# prediction
-# test_label=pd.DataFrame()
-# test_label['image_id']=te_filename
-# test_label['labels']=prediction
-# test_label=test_label.sort_values(by='image_id')
-# test_label.to_csv('/content/drive/MyDrive/weather_image/predict_label.csv',index=False)
+import pandas as pd
+prediction=cnn.predict(testData)
+prediction=np.argmax(prediction,axis=1)
+prediction
+test_label=pd.DataFrame()
+test_label['image_id']=te_filename
+test_label['labels']=prediction
+test_label=test_label.sort_values(by='image_id')
+test_label.to_csv('/content/drive/MyDrive/weather_image/predict_label.csv',index=False)

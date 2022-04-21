@@ -78,3 +78,6 @@ for counter, svm in enumerate(svm_list):
         plt.xlabel('sepal length (cm)')
         plt.ylabel('sepal width (cm)')
     plt.show()
+
+
+#cross validation
