@@ -1,34 +1,36 @@
 
 
 # mac 使用
-import imp
-import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-from keras.preprocessing.image import ImageDataGenerator
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
-from keras.utils import to_categorical
-from keras import regularizers
-from keras.callbacks import ModelCheckpoint, EarlyStopping
-from keras.optimizers import RMSprop, Adadelta, Adam, SGD
-from keras.losses import categorical_crossentropy, binary_crossentropy
+# import os
+# os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
+# from keras.preprocessing.image import ImageDataGenerator
+# from keras.models import Sequential
+# from keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
+# from keras.utils import to_categorical
+# from keras import regularizers
+# from keras.callbacks import ModelCheckpoint, EarlyStopping
+# from keras.optimizers import RMSprop, Adadelta, Adam, SGD
+# from keras.losses import categorical_crossentropy, binary_crossentropy
 
 # windows
-# import os
-# from tensorflow.keras.preprocessing.image import ImageDataGenerator
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
-# from tensorflow.keras.utils import to_categorical
-# from tensorflow.keras import regularizers
+import os
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPooling2D, Flatten, Dropout, BatchNormalization
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras import regularizers
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
+from tensorflow.keras.losses import categorical_crossentropy, binary_crossentropy
 # import tensorflow as tf
-# config = tf.compat.v1.ConfigProto()
-# config.gpu_options.allow_growth=True
-# sess = tf.compat.v1.Session(config=config)
+# tf.device("/device:GPU:0")
+# os.environ["CUDA_VISIBLE_DEVICES"]='-1' 
 
 # common
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from sklearn.utils import shuffle
 
 # 讀取資料－１
 # datagen = ImageDataGenerator(
@@ -70,7 +72,7 @@ print('\n')
 
 # convert image data to numpy
 def convertImageToNumpy(list):
-    data=np.empty(shape=(1048,300,300,3))
+    data=np.empty(shape=(1048,100,100,3))
     x=0
     label=[]
     fileNames=[]
@@ -78,7 +80,7 @@ def convertImageToNumpy(list):
         for i in range(len(os.listdir(url))):
             fileName=os.listdir(url)[i]
             img=cv2.imread(url+f"/{fileName}")
-            img=cv2.resize(img,(300,300))
+            img=cv2.resize(img,(100,100))
             img=img[:,:,::-1]/255
             data[x]=img
             label.append(index)
@@ -93,10 +95,7 @@ testData, testLabel, testFileNames = convertImageToNumpy(list=[testpath])
 # on-hot label
 trainLabel=to_categorical(trainLabel)
 # 打亂資料順序
-from sklearn.utils import shuffle
 tr_data,tr_label=shuffle(trainData,trainLabel,random_state=0)
-print("tr_data,tr_label len",len(tr_data),len(tr_label))
-print('\n')
 
 # train_validation data split
 #val_data數量固定262個
@@ -111,46 +110,46 @@ print('validation label size: ',val_label.shape)
 
 # define model
 cnn=Sequential() 
-cnn.add(Conv2D(filters=64,kernel_size=(3,3), input_shape=(300,300,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=64,kernel_size=(3,3), input_shape=(100,100,3),activation='relu',padding='same'))
 cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
 cnn.add(BatchNormalization())
+cnn.add(Dropout(0.5))
 cnn.add(MaxPooling2D(pool_size=(2,2),padding='same'))
 
-cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
-cnn.add(Conv2D(filters=64,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=128,kernel_size=(3,3),activation='relu',padding='same'))
+cnn.add(Conv2D(filters=128,kernel_size=(3,3),activation='relu',padding='same'))
 cnn.add(BatchNormalization())
 cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2,2),padding='same'))
 
-cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
 cnn.add(BatchNormalization())
 cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
-cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(32, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
 cnn.add(BatchNormalization())
 cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
-cnn.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
-cnn.add(Conv2D(16, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
+cnn.add(Conv2D(512, (3, 3), activation='relu', padding='same'))
 cnn.add(BatchNormalization())
 cnn.add(Dropout(0.25))
 cnn.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
 
 cnn.add(Flatten())
-cnn.add(Dense(units=32,kernel_regularizer=regularizers.l2(l=0.001),activation='relu'))
-cnn.add(Dense(units=16,kernel_regularizer=regularizers.l2(l=0.001),activation='relu'))
+cnn.add(Dense(units=300,kernel_regularizer=regularizers.l2(l=0.001),activation='relu'))
+cnn.add(Dense(units=10,kernel_regularizer=regularizers.l2(l=0.001),activation='relu'))
 cnn.add(Dense(units=4,activation='softmax'))
 # show the model structure
 cnn.summary()
 
-from keras.preprocessing.image import ImageDataGenerator ##Augmentation
 
 datagen = ImageDataGenerator(
         featurewise_center=False,  # 以每一張feature map為單位將平均值設為0
@@ -180,24 +179,25 @@ my_callbacks = [
 # optimizer = Adadelta(lr=1.0, rho=0.95, epsilon=None, decay=0.0)
 # optimizer = SGD(lr=0.01, momentum=0.0, decay=0.0, nesterov=False)
 
-cnn.compile(optimizer="adam",loss=binary_crossentropy,metrics=['accuracy'])
-history = cnn.fit_generator(datagen.flow(train_data, train_label, batch_size=32) , epochs=20, validation_data = (val_data, val_label),callbacks = my_callbacks)
+cnn.compile(optimizer="adam",loss="categorical_crossentropy",metrics=['accuracy'])
+history = cnn.fit_generator(datagen.flow(train_data, train_label, batch_size=16) , epochs=20, validation_data = (val_data, val_label),callbacks = my_callbacks)
 # history = cnn.fit(train_data, train_label, batch_size=32, epochs=20, validation_data = (val_data, val_label), callbacks=my_callbacks)
 print("++ finish training ++")
 
 # 繪圖
+fit=plt.figure(figsize=(10,10))
+plt.subplot(2,2,1)
 plt.plot(history.history['loss'],label='loss')
 plt.plot(history.history['val_loss'],label='val_loss')
 plt.title('loss curve')
 plt.ylabel('loss')
 plt.legend()
-plt.show()
-plt.plot(history.history['acc'],label='accuracy')
-plt.plot(history.history['val_acc'],label='val_accuracy')
+plt.subplot(2,2,2)
+plt.plot(history.history['accuracy'],label='accuracy')
+plt.plot(history.history['val_accuracy'],label='val_accuracy')
 plt.title('accuracy curve')
 plt.ylabel('accuracy')
 plt.legend()
-plt.show()
 
 # 混淆舉證
 import seaborn as sn
@@ -205,7 +205,7 @@ from sklearn.metrics import confusion_matrix
 pre=cnn.predict(val_data)
 pre=np.argmax(pre,axis=1)
 cm=confusion_matrix(pre,np.argmax(val_label,axis=1))
-fit=plt.figure(figsize=(8,6))
+plt.subplot(2,2,3)
 plt.title('confusion matrix')
 sn.heatmap(cm,annot=True,cmap='OrRd',fmt='g')
 plt.xlabel('prediction')

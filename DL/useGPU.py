@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.python.client import load_model
+from tensorflow.python.client import device_lib
 
 physical_devices = tf.config.list_physical_devices('GPU')
 print("Num GPUs:", len(physical_devices))
