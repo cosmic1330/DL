@@ -1,26 +1,11 @@
-
-# mac 使用
-import os
-os.environ["KERAS_BACKEND"] = "plaidml.keras.backend"
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
-from keras.optimizers import Adam
-from keras.preprocessing import image
-from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ModelCheckpoint
-from keras.callbacks import EarlyStopping
-from keras.utils.np_utils import to_categorical 
-
-
-# windows使用
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
-# from tensorflow.keras.optimizers import Adam
-# from tensorflow.keras.preprocessing import image
-# from tensorflow.keras.preprocessing.image import ImageDataGenerator
-# from tensorflow.keras.callbacks import ModelCheckpoint
-# from tensorflow.keras.callbacks import EarlyStopping
-# from tensorflow.keras.utils import to_categorical 
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, Activation, MaxPool2D, Flatten, Dropout, BatchNormalization
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras.callbacks import EarlyStopping
+from tensorflow.keras.utils import to_categorical 
 # 使用cpu
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"]='-1' 
@@ -106,8 +91,8 @@ model.add(MaxPool2D(pool_size=(2, 2)))
 model.add(Flatten())
 model.add(Dense(256))
 model.add(BatchNormalization())
-model.add(Activation("relu"))
 model.add(Dropout(0.25))
+model.add(Activation("relu"))
 
 #OUTPUT LAYER
 model.add(Dense(10, activation='softmax'))
@@ -139,7 +124,7 @@ my_callbacks = [
     # validation loss 三個執行週期沒改善就停止訓練
     EarlyStopping(patience=3, monitor = 'val_accuracy'),
     # save the best weights
-    ModelCheckpoint(filepath="Component/CNN/mnist_model_weight.h5", verbose=1, save_best_only=True)
+    # ModelCheckpoint(filepath="Component/CNN/mnist_model_weight.h5", verbose=1, save_best_only=True)
 ]
 
 # # 載入最近的檢查點的權重
@@ -148,10 +133,10 @@ my_callbacks = [
 # model.fit(x_train_norm, y_train, epochs=5, validation_split=0.2, callbacks=model_checkpoint_callback)
 
 # 降低資料佔據
-history = model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),shuffle=True,epochs=epochs, 
-                              validation_data = (x_val, y_val),
-                              verbose = 2, #verbose=2過程全顯示
+history = model.fit(x=datagen.flow(x_train, y_train, batch_size=batch_size),shuffle=True,epochs=epochs, 
+                              validation_data = datagen.flow(x_val, y_val, batch_size=batch_size),
                               steps_per_epoch=x_train.shape[0] // batch_size,
+                              validation_steps = x_val.shape[0] // batch_size,
                               callbacks=my_callbacks) #we save the best weights with checkpointer
 
 

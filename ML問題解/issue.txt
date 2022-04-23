@@ -29,3 +29,10 @@
 
 8. The caller indicates that this is not a failure, but may mean that there could be performance gains if more memory were available.
    A: resize,batch_size改小
+
+9. plaidml loss non issue (mac)
+   resolve: https://github.com/plaidml/plaidml/issues/948
+
+10. mac 環境安裝 （只能在py3.8）
+https://zhuanlan.zhihu.com/p/368680708
+https://neeraj-kumar-vaid.medium.com/install-deep-learning-libraries-on-apple-macbook-m1-pro-37444644299b
